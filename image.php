@@ -1,35 +1,59 @@
 <?php
-$image = imagecreatefrompng("images/banner.png");
+// Verbindung zur Datenbank herstellen
+$dsn = 'mysql:host=Placeholder; dbname=Placeholder';
+$user = 'Placeholder';
+$password = 'Placeholder';
+try {
+  $pdo = new PDO($dsn, $user, $password);
+} catch (PDOException $e) {
+  echo 'Connection failed: ' . $e->getMessage();
+}
 
-// setup color
-$r = 255;
-$g = 255;
-$b = 255;
+// Zufällige Nachricht aus der Datenbank auswählen
+$sql = "SELECT * FROM pn_teamspeak ORDER BY RAND() LIMIT 1";
+$stmt = $pdo->query($sql);
+$row = $stmt->fetch(PDO::FETCH_ASSOC);
+$infomsg = $row['msg'];
 
-$rdate = 47;
-$gdate = 132;
-$bdate = 189;
+// Verbindung zum Teamspeak-Server herstellen
+require_once 'libraries/TeamSpeak3/TeamSpeak3.php';
+$serverquery_username = "Placeholder";
+$serverquery_pass = "Placeholder";
+$serverip = "Placeholder";
+$serverquery_port = "10011";
+$serverport = "9987";
 
-// text-color
-$text_color = imagecolorallocate($image, $r, $g, $b);
-$date_color = imagecolorallocate($image, $rdate, $gdate, $bdate);
 
-// font
+try {
+  $ts3_VirtualServer = TeamSpeak3::factory("serverquery://$serverquery_username:$serverquery_pass@$serverip:$serverquery_port/?server_port=$serverport");
+  $nutzer = $ts3_VirtualServer->virtualserver_clientsonline - 1;
+  $snames = $ts3_VirtualServer->virtualserver_name;
+  $chn = "Channel: " . $ts3_VirtualServer->virtualserver_channelsonline;
+  $blabla = "User: " . $nutzer . "/" . $ts3_VirtualServer->virtualserver_maxclients;
+  $uptime = $ts3_VirtualServer->virtualserver_uptime;
+  $init = $uptime;
+  $days = floor($init / 86400);
+  $seconds = $init % 60;
+  $uptimeoutput = "Uptime: " . $days . " Tagen";
+  $currentDateTime = date('d.m.Y H:i');
+} catch (Exception $e) {
+  $error = "Offline";
+}
+// Bilderstellung
 $font = "font/Ubuntu-B.ttf";
+$image = imagecreatefrompng("images/banner.png");
+$blau = imagecolorallocate($image, 47, 132, 189);
+$weiss = imagecolorallocate($image, 255, 255, 255);
+imagettftext($image, 30, 0, 5, 50, $weiss, $font, $snames);
+imagettftext($image, 18, 0, 5, 100, $blau, $font, $infomsg);
 
-// string that will be displayed on the image
-$message = "Welcome on our TeamSpeak-Server!";
-$date = "It's " . date("H:i", time());
+imagettftext($image, 15, 0, 10, 170, $weiss, $font, $uptimeoutput);
+imagettftext($image, 25, 0, 10, 210, $weiss, $font, $currentDateTime);
 
-// apply image, font-size, angle, position-x, position-y, color, font, message
-imagettftext($image, 15, 0, 25, 50, $text_color, $font, $message);
-imagettftext($image, 25, 0, 45, 150, $date_color, $font, $date);
+imagettftext($image, 20, 0, 450, 180, $weiss, $font, $blabla);
+imagettftext($image, 20, 0, 450, 210, $weiss, $font, $chn);
 
-// set the header type to an image 
-header('Content-type: image/png');
-
-// echo the image
+header('Content-Type: image/png');
 imagepng($image);
 
-// clear cache
 imagedestroy($image);
