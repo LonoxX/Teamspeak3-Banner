@@ -49,7 +49,7 @@ Laden das Bild über den folgenden Link auf: `http://IHR_SERVER/pfad/zu/index.ph
 
 # Support
 
-#### © 2019 - 2022 Panda-Network
+#### © 2019 - 2023 Panda-Network
 
 > Webseite: [Panda-Network.de](https://panda-network.de) \
-> Support [Discord-Server](https://pnnet.dev/discord)
+> Support [Discord-Server](https://discord.gg/z8ScRvf)
